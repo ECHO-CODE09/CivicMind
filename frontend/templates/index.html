@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CivicMind</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=Crimson+Pro:ital,wght@0,300;0,600;1,300&display=swap" rel="stylesheet"/>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{--bg:#08080f;--card:#10101c;--border:#1a1a2e;--adv:#00ff88;--chal:#ff3e6c;--arb:#f0c040;--text:#e8e8f0;--muted:#50507a}
+  body{background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;min-height:100vh}
+  body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+    background-image:linear-gradient(rgba(0,255,136,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,136,.025) 1px,transparent 1px);
+    background-size:44px 44px}
+  .wrap{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:40px 20px 100px}
+  nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:48px;padding-bottom:18px;border-bottom:1px solid var(--border)}
+  .nav-logo{font-family:'Bebas Neue';font-size:26px;letter-spacing:4px;background:linear-gradient(90deg,var(--adv),#00ccff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  nav a{color:var(--muted);text-decoration:none;font-size:11px;letter-spacing:2px;margin-left:22px;transition:color .2s}
+  nav a:hover{color:var(--adv)}
+  header{text-align:center;margin-bottom:44px}
+  .logo{font-family:'Bebas Neue';font-size:clamp(58px,11vw,96px);letter-spacing:8px;line-height:1;
+    background:linear-gradient(135deg,var(--adv) 0%,#00ccff 40%,var(--chal) 100%);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 35px rgba(0,255,136,.22))}
+  .tagline{font-family:'Crimson Pro';font-style:italic;font-size:18px;color:var(--muted);margin-top:8px}
+  .badge{display:inline-block;margin-top:14px;padding:4px 14px;border:1px solid var(--border);border-radius:2px;font-size:9px;letter-spacing:3px;color:var(--muted)}
+
+  /* STATS */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px}
+  .stat{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:14px;text-align:center}
+  .stat-n{font-family:'Bebas Neue';font-size:30px;color:var(--adv);letter-spacing:2px}
+  .stat-l{font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-top:2px}
+
+  /* INPUT */
+  .input-card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:28px;margin-bottom:28px;position:relative;overflow:hidden}
+  .input-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--adv),#00ccff,var(--chal))}
+  .lbl{font-size:10px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:12px}
+  textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:'Crimson Pro';font-size:17px;padding:14px 16px;resize:vertical;min-height:96px;outline:none;transition:border-color .3s}
+  textarea:focus{border-color:var(--adv)}
+  textarea::placeholder{color:var(--muted);font-style:italic}
+  .presets{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .pre{background:transparent;border:1px solid var(--border);color:var(--muted);font-family:'DM Mono';font-size:10px;padding:6px 12px;border-radius:2px;cursor:pointer;transition:all .2s}
+  .pre:hover{border-color:var(--adv);color:var(--adv);background:rgba(0,255,136,.05)}
+  .go{display:block;width:100%;margin-top:16px;padding:16px;background:linear-gradient(135deg,rgba(0,255,136,.1),rgba(0,204,255,.08));border:1px solid var(--adv);color:var(--adv);font-family:'Bebas Neue';font-size:22px;letter-spacing:5px;cursor:pointer;border-radius:3px;transition:all .3s}
+  .go:hover:not(:disabled){box-shadow:0 0 28px rgba(0,255,136,.2);transform:translateY(-1px)}
+  .go:disabled{opacity:.35;cursor:not-allowed;transform:none}
+
+  /* ARENA */
+  #arena{display:none}
+  #arena.show{display:block}
+  .status{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--card);border:1px solid var(--border);border-radius:3px;margin-bottom:20px;font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--muted);transition:all .3s;flex-shrink:0}
+  .dot.live{background:var(--adv);box-shadow:0 0 10px var(--adv);animation:blink 1s infinite}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+  .acard{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:22px;min-height:200px}
+  .acard.adv{border-left:3px solid var(--adv)}
+  .acard.chal{border-left:3px solid var(--chal)}
+  .ahd{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .anm{font-family:'Bebas Neue';font-size:15px;letter-spacing:3px}
+  .adv .anm{color:var(--adv)}.chal .anm{color:var(--chal)}
+  .arole{font-size:9px;letter-spacing:2px;color:var(--muted);margin-left:auto}
+  .abody{font-family:'Crimson Pro';font-size:15px;line-height:1.75;min-height:110px}
+  .arb-card{background:var(--card);border:1px solid var(--border);border-top:3px solid var(--arb);border-radius:4px;padding:26px;margin-bottom:14px}
+  .arb-nm{font-family:'Bebas Neue';font-size:17px;letter-spacing:4px;color:var(--arb)}
+  .arb-body{font-family:'Crimson Pro';font-size:15px;line-height:1.8;min-height:70px;margin-top:12px}
+  .vcard{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:26px;margin-bottom:14px}
+  .cbar{margin-bottom:12px}
+  .clbl{display:flex;justify-content:space-between;font-size:11px;letter-spacing:1px;color:var(--muted);margin-bottom:5px}
+  .track{height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+  .fill{height:100%;border-radius:3px;width:0;transition:width 1.5s cubic-bezier(.16,1,.3,1)}
+  .fill.a{background:var(--adv)}.fill.c{background:var(--chal)}.fill.n{background:var(--arb)}
+  .fverdict{margin-top:18px;padding:16px;border:1px solid rgba(240,192,64,.25);border-radius:3px;font-family:'Crimson Pro';font-size:16px;line-height:1.7;font-style:italic;color:var(--arb);background:rgba(240,192,64,.04)}
+  .bias-card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:22px;margin-bottom:14px}
+  .brow{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+  .brow:last-child{border-bottom:none}
+  .btxt{font-family:'Crimson Pro';font-size:15px;line-height:1.5;flex:1}
+  .ftag{flex-shrink:0;font-size:9px;letter-spacing:2px;padding:3px 8px;border-radius:2px;text-transform:uppercase;border:1px solid}
+  .ftag.HIGH{color:var(--chal);border-color:var(--chal);background:rgba(255,62,108,.08)}
+  .ftag.MEDIUM{color:var(--arb);border-color:var(--arb);background:rgba(240,192,64,.08)}
+  .ftag.LOW{color:var(--adv);border-color:var(--adv);background:rgba(0,255,136,.08)}
+  .dots{display:inline-flex;gap:5px;align-items:center;padding-top:6px}
+  .dots span{width:7px;height:7px;border-radius:50%;background:var(--muted);animation:dot 1.2s infinite}
+  .dots span:nth-child(2){animation-delay:.2s}.dots span:nth-child(3){animation-delay:.4s}
+  .reset{display:block;width:100%;margin-top:12px;padding:12px;background:transparent;border:1px solid var(--border);color:var(--muted);font-family:'DM Mono';font-size:11px;letter-spacing:2px;cursor:pointer;border-radius:3px;transition:all .2s;text-transform:uppercase}
+  .reset:hover{border-color:var(--chal);color:var(--chal)}
+  .err{padding:12px 16px;background:rgba(255,62,108,.08);border:1px solid rgba(255,62,108,.3);border-radius:3px;color:var(--chal);font-size:13px;margin-top:10px}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+  @keyframes dot{0%,80%,100%{transform:scale(.6);opacity:.3}40%{transform:scale(1);opacity:1}}
+  @media(max-width:600px){.two{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <div class="nav-logo">CivicMind</div>
+    <div>
+      <a href="/">Debate</a>
+      <a href="/history">History</a>
+      <a href="/docs" target="_blank">API</a>
+    </div>
+  </nav>
+
+  <header>
+    <div class="logo">CivicMind</div>
+    <div class="tagline">An AI that argues against itself — for fairer decisions</div>
+    <div class="badge">⚖ Open Innovation · Unbiased AI Decision Track</div>
+  </header>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-n" id="st0">—</div><div class="stat-l">Debates</div></div>
+    <div class="stat"><div class="stat-n" id="st1">—</div><div class="stat-l">Avg FOR %</div></div>
+    <div class="stat"><div class="stat-n" id="st2">—</div><div class="stat-l">Avg AGAINST %</div></div>
+    <div class="stat"><div class="stat-n" id="st3">—</div><div class="stat-l">Bias Flags</div></div>
+  </div>
+
+  <div class="input-card">
+    <div class="lbl">// Enter a civic, policy or ethical decision</div>
+    <textarea id="q" placeholder="e.g. Should we build a highway through the downtown neighborhood?"></textarea>
+    <div class="presets">
+      <button class="pre" onclick="setQ('Should we build a highway through the downtown neighborhood?')">🛣 Highway</button>
+      <button class="pre" onclick="setQ('Should AI be used to screen job applicants automatically?')">🤖 AI Hiring</button>
+      <button class="pre" onclick="setQ('Should the government mandate vaccines for school children?')">💉 Vaccines</button>
+      <button class="pre" onclick="setQ('Should social media be banned for users under 16?')">📱 Social Media</button>
+      <button class="pre" onclick="setQ('Should police use facial recognition in public spaces?')">👁 Face Recognition</button>
+    </div>
+    <button class="go" id="goBtn" onclick="startDebate()">⚡ START THE DEBATE</button>
+    <div id="err"></div>
+  </div>
+
+  <div id="arena">
+    <div class="status"><div class="dot" id="sDot"></div><span id="sTxt">INITIALIZING...</span></div>
+
+    <div class="two">
+      <div class="acard adv">
+        <div class="ahd"><span>✅</span><span class="anm">Advocate</span><span class="arole">Argues FOR</span></div>
+        <div class="abody" id="advB"><div class="dots"><span></span><span></span><span></span></div></div>
+      </div>
+      <div class="acard chal">
+        <div class="ahd"><span>❌</span><span class="anm">Challenger</span><span class="arole">Argues AGAINST</span></div>
+        <div class="abody" id="chalB"><div class="dots"><span></span><span></span><span></span></div></div>
+      </div>
+    </div>
+
+    <div class="arb-card">
+      <div class="ahd"><span style="font-size:20px">⚖️</span><span class="arb-nm">Neutral Arbitrator</span><span class="arole" style="margin-left:auto">Weighs Both Sides</span></div>
+      <div class="arb-body" id="arbB"><div class="dots"><span></span><span></span><span></span></div></div>
+    </div>
+
+    <div class="vcard" id="vcard" style="display:none">
+      <div class="lbl" style="margin-bottom:18px">// CONFIDENCE BREAKDOWN</div>
+      <div class="cbar"><div class="clbl"><span>FOR</span><span id="sc0">0%</span></div><div class="track"><div class="fill a" id="fl0"></div></div></div>
+      <div class="cbar"><div class="clbl"><span>AGAINST</span><span id="sc1">0%</span></div><div class="track"><div class="fill c" id="fl1"></div></div></div>
+      <div class="cbar"><div class="clbl"><span>NEEDS MORE STUDY</span><span id="sc2">0%</span></div><div class="track"><div class="fill n" id="fl2"></div></div></div>
+      <div class="fverdict" id="fv"></div>
+    </div>
+
+    <div class="bias-card" id="bcard" style="display:none">
+      <div class="lbl" style="margin-bottom:14px">// BIAS FLAGS DETECTED</div>
+      <div id="blist"></div>
+    </div>
+
+    <button class="reset" onclick="reset()">↩ NEW DEBATE</button>
+  </div>
+</div>
+
+<script>
+  async function loadStats(){
+    try{
+      const d=await(await fetch('/api/stats')).json();
+      document.getElementById('st0').textContent=d.total_debates;
+      document.getElementById('st1').textContent=d.avg_for_score+'%';
+      document.getElementById('st2').textContent=d.avg_against+'%';
+      document.getElementById('st3').textContent=d.total_bias_flags;
+    }catch(e){}
+  }
+  loadStats();
+
+  function setQ(t){document.getElementById('q').value=t}
+  function setS(t,live=true){
+    document.getElementById('sTxt').textContent=t;
+    document.getElementById('sDot').className='dot'+(live?' live':'');
+  }
+  function dots(id){document.getElementById(id).innerHTML='<div class="dots"><span></span><span></span><span></span></div>'}
+  function type(id,text){
+    return new Promise(r=>{
+      const el=document.getElementById(id);
+      el.textContent='';let i=0;
+      const t=setInterval(()=>{el.textContent=text.slice(0,++i);if(i>=text.length){clearInterval(t);r();}},Math.max(6,1800/text.length));
+    });
+  }
+
+  async function startDebate(){
+    const q=document.getElementById('q').value.trim();
+    if(!q){document.getElementById('err').innerHTML='<div class="err">⚠ Please enter a question first.</div>';return;}
+    document.getElementById('err').innerHTML='';
+    document.getElementById('goBtn').disabled=true;
+    document.getElementById('arena').className='show';
+    document.getElementById('vcard').style.display='none';
+    document.getElementById('bcard').style.display='none';
+    ['advB','chalB','arbB'].forEach(dots);
+    setS('RUNNING 3 AI AGENTS...',true);
+
+    try{
+      const res=await fetch('/api/debate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q})});
+      if(!res.ok){const e=await res.json();throw new Error(e.detail||'Server error');}
+      const d=await res.json();
+
+      setS('ADVOCATE SPEAKING...',true); await type('advB',d.advocate_arg);
+      setS('CHALLENGER RESPONDING...',true); await type('chalB',d.challenger_arg);
+      setS('ARBITRATOR DELIBERATING...',true); await type('arbB',d.arbitrator_arg);
+
+      document.getElementById('vcard').style.display='block';
+      setTimeout(()=>{
+        document.getElementById('sc0').textContent=d.for_score+'%';
+        document.getElementById('sc1').textContent=d.against_score+'%';
+        document.getElementById('sc2').textContent=d.neutral_score+'%';
+        document.getElementById('fl0').style.width=d.for_score+'%';
+        document.getElementById('fl1').style.width=d.against_score+'%';
+        document.getElementById('fl2').style.width=d.neutral_score+'%';
+      },100);
+      document.getElementById('fv').textContent='"'+d.final_verdict+'"';
+
+      if(d.bias_flags&&d.bias_flags.length){
+        document.getElementById('bcard').style.display='block';
+        const icons={HIGH:'🔴',MEDIUM:'🟡',LOW:'🟢'};
+        document.getElementById('blist').innerHTML=d.bias_flags.map(f=>`
+          <div class="brow">
+            <span style="font-size:16px;flex-shrink:0;margin-top:2px">${icons[f.severity]||'⚠️'}</span>
+            <span class="btxt"><strong>${f.type}</strong> — ${f.description}</span>
+            <span class="ftag ${f.severity}">${f.severity}</span>
+          </div>`).join('');
+      }
+
+      setS('DEBATE COMPLETE — Saved to DB',false);
+      loadStats();
+    }catch(e){
+      document.getElementById('err').innerHTML=`<div class="err">⚠ ${e.message}</div>`;
+      setS('ERROR',false);
+    }
+    document.getElementById('goBtn').disabled=false;
+  }
+
+  function reset(){
+    document.getElementById('arena').className='';
+    document.getElementById('q').value='';
+    document.getElementById('goBtn').disabled=false;
+    document.getElementById('err').innerHTML='';
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+</script>
+</body>
+</html>

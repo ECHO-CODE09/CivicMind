@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CivicMind — History</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400&family=Crimson+Pro:ital,wght@0,300;1,300&display=swap" rel="stylesheet"/>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{--bg:#08080f;--card:#10101c;--border:#1a1a2e;--adv:#00ff88;--chal:#ff3e6c;--arb:#f0c040;--text:#e8e8f0;--muted:#50507a}
+  body{background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;min-height:100vh}
+  body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(0,255,136,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,136,.025) 1px,transparent 1px);background-size:44px 44px}
+  .wrap{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:40px 20px 100px}
+  nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:48px;padding-bottom:18px;border-bottom:1px solid var(--border)}
+  .nav-logo{font-family:'Bebas Neue';font-size:26px;letter-spacing:4px;background:linear-gradient(90deg,var(--adv),#00ccff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  nav a{color:var(--muted);text-decoration:none;font-size:11px;letter-spacing:2px;margin-left:22px;transition:color .2s}
+  nav a:hover,nav a.active{color:var(--adv)}
+  h1{font-family:'Bebas Neue';font-size:48px;letter-spacing:6px;background:linear-gradient(135deg,var(--adv),#00ccff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px}
+  .sub{font-family:'Crimson Pro';font-style:italic;color:var(--muted);margin-bottom:34px}
+  .item{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:22px;margin-bottom:12px;position:relative;overflow:hidden;transition:border-color .3s}
+  .item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--adv);transform:scaleY(0);transition:transform .3s}
+  .item:hover{border-color:var(--adv)}.item:hover::before{transform:scaleY(1)}
+  .iq{font-family:'Crimson Pro';font-size:17px;margin-bottom:12px;line-height:1.5}
+  .imeta{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .itag{font-size:10px;letter-spacing:1.5px;padding:3px 9px;border-radius:2px;border:1px solid}
+  .itag.f{color:var(--adv);border-color:var(--adv);background:rgba(0,255,136,.06)}
+  .itag.a{color:var(--chal);border-color:var(--chal);background:rgba(255,62,108,.06)}
+  .itag.b{color:var(--arb);border-color:var(--arb);background:rgba(240,192,64,.06)}
+  .itime{font-size:10px;color:var(--muted);margin-left:auto}
+  .iv{font-family:'Crimson Pro';font-style:italic;color:var(--muted);font-size:14px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+  .loading{text-align:center;padding:60px;color:var(--muted);letter-spacing:2px;font-size:13px}
+  .empty{text-align:center;padding:80px 20px;color:var(--muted)}
+  .newbtn{display:inline-block;margin-top:18px;padding:11px 26px;border:1px solid var(--adv);color:var(--adv);font-family:'DM Mono';font-size:11px;letter-spacing:3px;text-decoration:none;border-radius:3px;transition:all .2s}
+  .newbtn:hover{background:rgba(0,255,136,.08)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <div class="nav-logo">CivicMind</div>
+    <div><a href="/">Debate</a><a href="/history" class="active">History</a><a href="/docs" target="_blank">API</a></div>
+  </nav>
+  <h1>Debate History</h1>
+  <div class="sub">All past debates stored in PostgreSQL — most recent first</div>
+  <div id="list"><div class="loading">LOADING FROM DATABASE...</div></div>
+</div>
+<script>
+  async function load(){
+    try{
+      const debates=await(await fetch('/api/debates')).json();
+      const el=document.getElementById('list');
+      if(!debates.length){
+        el.innerHTML=`<div class="empty"><div style="font-size:48px">⚖️</div><br><span style="font-family:'Crimson Pro';font-style:italic;font-size:18px">No debates yet. Start your first one!</span><br><a href="/" class="newbtn" style="margin-top:20px;display:inline-block">START A DEBATE</a></div>`;
+        return;
+      }
+      el.innerHTML=debates.map(d=>`
+        <div class="item">
+          <div class="iq">${d.question}</div>
+          <div class="imeta">
+            <span class="itag f">FOR ${d.for_score}%</span>
+            <span class="itag a">AGAINST ${d.against_score}%</span>
+            <span class="itag b">⚑ ${d.bias_count} BIAS FLAGS</span>
+            <span class="itime">${new Date(d.created_at).toLocaleString('en-IN')}</span>
+          </div>
+          ${d.final_verdict?`<div class="iv">"${d.final_verdict}"</div>`:''}
+        </div>`).join('');
+    }catch(e){document.getElementById('list').innerHTML='<div class="loading">Error loading. Is the server running?</div>';}
+  }
+  load();
+</script>
+</body>
+</html>
