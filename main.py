@@ -13,7 +13,9 @@ from backend.agents import run_advocate, run_challenger, run_arbitrator, run_bia
 load_dotenv()
 
 app = FastAPI(title="CivicMind API")
-app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
+
+if os.path.exists("frontend/static"):
+    app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
 templates = Jinja2Templates(directory="frontend/templates")
 
 
